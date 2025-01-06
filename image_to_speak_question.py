@@ -109,14 +109,23 @@ def main(image_path):
         summary = summarize_text(extracted_text)
         print("\nSummary:\n", summary)
         speak_text(summary, speed_factor=1.7)
-        question = get_voice_input()
-        print(question)
-        answer = qa_pipeline(question=question, context=summary)
-        print(type(summary))
-        print(type(answer))
-
+        while True: 
+            speak_text("Is there anything else you want to ask?", speed_factor=1.7)    
+            question = get_voice_input()
+            print(type(question))
+    
+            # Correct condition for quitting the loop
+            if question.lower() in ['quit', 'stop']:
+                speak_text("Bye bye", speed_factor=1.7)
+                break
+    
+            print(question)
+            answer = qa_pipeline(question=question, context=summary)
+            print(type(summary))
+            print(type(answer))
+    
+            speak_text(answer['answer'], speed_factor=1.7)
         
-        speak_text(answer['answer'], speed_factor=1.7)
         print("\nQuestion Answering:\n", answer['answer'])
 
 
