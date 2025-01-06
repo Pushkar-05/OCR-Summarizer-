@@ -9,6 +9,10 @@ import soundfile as sf
 import io
 import librosa
 
+#Input for audio pipeline 
+import speech_recognition as sr
+
+
 """
 OCR and Text Summarization from Image (Optimized for Local Jupyter Notebook)
 
@@ -21,9 +25,27 @@ License: MIT License
 
 # Initialize the summarizer with Hugging Face
 summarizer = pipeline("summarization", model="facebook/bart-large-cnn")
+qa_pipeline = pipeline("question-answering", model="distilbert-base-cased-distilled-squad")
+
 
 # Set path for Tesseract (Windows-specific adjustment)
 pytesseract.pytesseract.tesseract_cmd = r'C:\Program Files\Tesseract-OCR\tesseract.exe'  # Update if necessary
+
+#INPUT VOICE FUNCTION
+def get_voice_input():
+    recognizer = sr.Recognizer()
+    with sr.Microphone() as source:
+        print("Listening...")
+        audio = recognizer.listen(source)
+        print("LISTENING DONE")
+        try:
+            print("in try")
+            return recognizer.recognize_google(audio)
+            print("Try done")
+        except sr.UnknownValueError:
+            return "Sorry, I couldn't understand that."
+        except sr.RequestError:
+            return "There was an error with the speech service."
 
 # OCR Function
 def ocr_image_from_path(image_path):
@@ -87,6 +109,15 @@ def main(image_path):
         summary = summarize_text(extracted_text)
         print("\nSummary:\n", summary)
         speak_text(summary, speed_factor=1.7)
+        question = get_voice_input()
+        print(question)
+        answer = qa_pipeline(question=question, context=summary)
+        print(type(summary))
+        print(type(answer))
+
+        
+        speak_text(answer['answer'], speed_factor=1.7)
+        print("\nQuestion Answering:\n", answer['answer'])
 
 
     
